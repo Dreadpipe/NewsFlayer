@@ -1,20 +1,20 @@
 // Dependencies
-var express = require("express");
-var logger = require("morgan");
-var mongoose = require("mongoose");
-var path = require("path");
+const express = require("express");
+const logger = require("morgan");
+const mongoose = require("mongoose");
+const path = require("path");
 
 // Requiring Comment and Article models
-var db = require("./models");
+const db = require("./models");
 
 // Scraping tools
-var cheerio = require("cheerio");
+const cheerio = require("cheerio");
 
 //Define port
-var port = process.env.PORT || 3000
+const port = process.env.PORT || 3000
 
 // Initialize Express
-var app = express();
+const app = express();
 app.use(logger("dev"));
 
 
@@ -22,7 +22,7 @@ app.use(logger("dev"));
 app.use(express.static("public"));
 
 // Set Handlebars, ty github.com/llh914.
-var exphbs = require("express-handlebars");
+const exphbs = require("express-handlebars");
 
 app.engine("handlebars", exphbs({
     defaultLayout: "main",
@@ -31,7 +31,7 @@ app.engine("handlebars", exphbs({
 app.set("view engine", "handlebars");
 
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
 mongoose.connect(MONGODB_URI);
 
@@ -54,7 +54,7 @@ app.get("/", function (req, res) {
     Article.find({
         "saved": false
     }, function (error, data) {
-        var hbsObject = {
+        const hbsObject = {
             article: data
         };
         console.log(hbsObject);
@@ -66,7 +66,7 @@ app.get("/saved", function (req, res) {
     Article.find({
         "saved": true
     }).populate("notes").exec(function (error, articles) {
-        var hbsObject = {
+        const hbsObject = {
             article: articles
         };
         res.render("saved", hbsObject);
@@ -78,11 +78,11 @@ app.get("/scrape", function (req, res) {
     // First, we grab the body of the html with request
     axios.get("https://www.nytimes.com/").then(function (response) {
         // Then, we load that into cheerio and save it to $ for a shorthand selector
-        var $ = cheerio.load(response.data);
+        const $ = cheerio.load(response.data);
         // Now, we grab every h2 within an article tag, and do the following:
         $("article").each(function (i, element) {
             // Save an empty result object
-            var result = {};
+            const result = {};
             // Add the text and href of every link, and save them as properties of the result object
             result.title = $(this)
                 .children("a")
@@ -185,7 +185,7 @@ app.post("/articles/delete/:id", function (req, res) {
 // Create a new note
 app.post("/notes/save/:id", function (req, res) {
     // Create a new note and pass the req.body to the entry
-    var newNote = new Note({
+    const newNote = new Note({
         body: req.body.text,
         article: req.params.id
     });

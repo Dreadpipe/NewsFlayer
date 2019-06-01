@@ -1,11 +1,11 @@
 // Require mongoose
-var mongoose = require("mongoose");
-var Note = require("./Note");
+const mongoose = require("mongoose");
+const Note = require("./Note");
 // Create Schema class
-var Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
 // Create article schema
-var ArticleSchema = new Schema({
+const ArticleSchema = new Schema({
     title: {
         type: String,
         required: true
@@ -29,7 +29,7 @@ var ArticleSchema = new Schema({
 });
 
 // Create the Article model with the ArticleSchema
-var Article = mongoose.model("Article", ArticleSchema);
+const Article = mongoose.model("Article", ArticleSchema);
 
 // Export the model
 module.exports = Article;
