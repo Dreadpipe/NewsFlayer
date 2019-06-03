@@ -1,10 +1,12 @@
+process.on('unhandledRejection', up => { throw up })
+
 // Dependencies
 const express = require("express");
 const logger = require("morgan");
 const mongoose = require("mongoose");
 const path = require("path");
 
-// Requiring Comment and Article models
+// Requiring Note and Article models
 const db = require("./models");
 
 // Scraping tools
@@ -33,26 +35,15 @@ app.set("view engine", "handlebars");
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
-mongoose.connect(MONGODB_URI);
-
-
-// Show any mongoose errors
-db.on("error", function (error) {
-    console.log("Mongoose Error: ", error);
-});
-
-// Once logged in to the db through mongoose, log a success message
-db.once("open", function () {
-    console.log("Mongoose connection successful.");
-});
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true }, { useFindAndModify: false });
 
 // Routes
 // ======
 
 //GET requests to render Handlebars pages
 app.get("/", function (req, res) {
-    Article.find({
-        "saved": false
+    db.Article.find({
+        saved: false
     }, function (error, data) {
         const hbsObject = {
             article: data
@@ -63,8 +54,8 @@ app.get("/", function (req, res) {
 });
 
 app.get("/saved", function (req, res) {
-    Article.find({
-        "saved": true
+    db.Article.find({
+        saved: true
     }).populate("notes").exec(function (error, articles) {
         const hbsObject = {
             article: articles
@@ -144,12 +135,12 @@ app.get("/articles/:id", function (req, res) {
 app.post("/articles/save/:id", function (req, res) {
     // Use the article id to find and update its saved boolean
     db.Article.findOneAndUpdate({
-            "_id": req.params.id
+            _id: req.params.id
         }, {
-            "saved": true
+            saved: true
         })
         // Execute the above query
-        .exec(function (err, doc) {
+        .then(function (err, doc) {
             // Log any errors
             if (err) {
                 console.log(err);
@@ -164,13 +155,13 @@ app.post("/articles/save/:id", function (req, res) {
 app.post("/articles/delete/:id", function (req, res) {
     // Use the article id to find and update its saved boolean
     db.Article.findOneAndUpdate({
-            "_id": req.params.id
+            _id: req.params.id
         }, {
-            "saved": false,
-            "notes": []
+            saved: false,
+            notes: []
         })
         // Execute the above query
-        .exec(function (err, doc) {
+        .then(function (err, doc) {
             // Log any errors
             if (err) {
                 console.log(err);
@@ -200,14 +191,14 @@ app.post("/notes/save/:id", function (req, res) {
         else {
             // Use the article id to find and update it's notes
             db.Article.findOneAndUpdate({
-                    "_id": req.params.id
+                    _id: req.params.id
                 }, {
                     $push: {
-                        "notes": note
+                        notes: note
                     }
                 })
                 // Execute the above query
-                .exec(function (err) {
+                .then(function (err) {
                     // Log any errors
                     if (err) {
                         console.log(err);
@@ -225,22 +216,22 @@ app.post("/notes/save/:id", function (req, res) {
 app.delete("/notes/delete/:note_id/:article_id", function (req, res) {
     // Use the note id to find and delete it
     db.Note.findOneAndRemove({
-        "_id": req.params.note_id
+        _id: req.params.note_id
     }, function (err) {
         // Log any errors
         if (err) {
             console.log(err);
             res.send(err);
         } else {
-            Article.findOneAndUpdate({
-                    "_id": req.params.article_id
+            db.Article.findOneAndUpdate({
+                    _id: req.params.article_id
                 }, {
                     $pull: {
-                        "notes": req.params.note_id
+                        notes: req.params.note_id
                     }
                 })
                 // Execute the above query
-                .exec(function (err) {
+                .then(function (err) {
                     // Log any errors
                     if (err) {
                         console.log(err);
