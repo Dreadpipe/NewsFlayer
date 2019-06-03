@@ -206,7 +206,7 @@ app.post("/notes/save/:id", function (req, res) {
 // Delete a note
 app.delete("/notes/delete/:note_id/:article_id", function (req, res) {
     // Use the note id to find and delete it
-    db.Note.findOneAndRemove(req.body)
+    db.Note.findOneAndRemove(_id: req.params.note_id)
         .then(function (dbNote) {
             return db.Article.findOneAndUpdate({
                 _id: req.params.id
