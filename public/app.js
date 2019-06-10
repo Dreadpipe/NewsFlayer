@@ -1,3 +1,4 @@
+$(document).ready(function () {
 //Handle Scrape button
 $("#scrape").on("click", function () {
     $.ajax({
@@ -72,4 +73,5 @@ $(".deleteNote").on("click", function () {
         $(".modalNote").modal("hide");
         window.location = "/saved"
     })
+});
 });

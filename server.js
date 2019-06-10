@@ -1,6 +1,3 @@
-process.on('unhandledRejection', up => {
-    throw up
-})
 
 // Dependencies
 const express = require("express");
@@ -37,38 +34,13 @@ app.set("view engine", "handlebars");
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true
-}, {
+mongoose.connect(MONGODB_URI, {  
+    useNewUrlParser: true, 
     useFindAndModify: false
 });
 
 // Routes
 // ======
-
-//GET requests to render Handlebars pages
-app.get("/", function (req, res) {
-    db.Article.find({
-        saved: false
-    }, function (error, data) {
-        const hbsObject = {
-            article: data
-        };
-        console.log(hbsObject);
-        res.render("home", hbsObject);
-    });
-});
-
-app.get("/saved", function (req, res) {
-    db.Article.find({
-        saved: true
-    }).populate("notes").exec(function (error, articles) {
-        const hbsObject = {
-            article: articles
-        };
-        res.render("saved", hbsObject);
-    });
-});
 
 // A GET request to scrape the echojs website
 app.get("/scrape", function (req, res) {
@@ -103,6 +75,31 @@ app.get("/scrape", function (req, res) {
 
     });
 });
+
+//GET requests to render Handlebars pages
+app.get("/", function (req, res) {
+    db.Article.find({
+        saved: false
+    }, function (error, data) {
+        const hbsObject = {
+            article: data
+        };
+        console.log(hbsObject);
+        res.render("home", hbsObject);
+    });
+});
+
+app.get("/saved", function (req, res) {
+    db.Article.find({
+        saved: true
+    }).populate("notes").exec(function (error, articles) {
+        const hbsObject = {
+            article: articles
+        };
+        res.render("saved", hbsObject);
+    });
+});
+
 
 // Route for getting all Articles from the db
 app.get("/articles", function (req, res) {
@@ -206,7 +203,7 @@ app.post("/notes/save/:id", function (req, res) {
 // Delete a note
 app.delete("/notes/delete/:note_id/:article_id", function (req, res) {
     // Use the note id to find and delete it
-    db.Note.findOneAndRemove(_id: req.params.note_id)
+    db.Note.findOneAndRemove({_id: req.params.note_id})
         .then(function (dbNote) {
             return db.Article.findOneAndUpdate({
                 _id: req.params.id
