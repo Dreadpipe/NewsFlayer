@@ -4,6 +4,7 @@ const express = require("express");
 const logger = require("morgan");
 const mongoose = require("mongoose");
 const path = require("path");
+const axios = require("axios")
 
 // Requiring Note and Article models
 const db = require("./models");
@@ -54,12 +55,17 @@ app.get("/scrape", function (req, res) {
             const result = {};
             // Add the text and href of every link, and save them as properties of the result object
             result.title = $(this)
-                .children("a")
+                .find("h2")
                 .text();
-            result.link = $(this)
-                .children("a")
+            result.link = 
+                "https://www.nytimes.com/" +
+                $(this)
+                .find("a")
                 .attr("href");
             // Create a new Article using the `result` object built from scraping
+
+            console.log("This is the result: " + result) 
+
             db.Article.create(result)
                 .then(function (dbArticle) {
                     // View the added result in the console
